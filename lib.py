@@ -1,11 +1,10 @@
-# Copyright 2017 Peter de Vocht
 import en_core_web_sm
 from collections.abc import Iterable
 import shelve
 import spacy
 
 class SVO:
-
+    # Copyright 2017 Peter de Vocht
     # use spacy small model
     nlp = en_core_web_sm.load()
 
