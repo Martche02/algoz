@@ -2,6 +2,7 @@ import en_core_web_sm
 from collections.abc import Iterable
 import shelve
 import spacy
+import nltk
 
 class SVO:
     # Copyright 2017 Peter de Vocht
@@ -316,8 +317,14 @@ class SVO:
                             # no obj - just return the SV parts
                             svos.append((self.to_str(self.expand(sub, tokens, visited)),
                                         "!" + v.lower_ if verbNegated else v.lower_,))
-
-        return svos
+        
+        j = []
+        for i in svos:
+            i = list(i)
+            while len(i)<3:
+                i.append("")
+            j.append(i)
+        return j
 def svo(w):
     return SVO(w).tpl()
 def menu(u, nome="Algoz"):
@@ -329,21 +336,40 @@ def menu(u, nome="Algoz"):
         option = int(input('Enter your choice: '))
         
         if option == 1:
-            universos = shelve.open("universos")
-            universos[input("Write the name of your Universe")] = u
-            print("Your Universe is saved")
+            try:
+                universos = shelve.open("universos")
+                universos[input("Write the name of your Universe")] = u
+                print("Your Universe is saved")
+            except Exception as e:
+                print (e)
+            input(nome+"> "+"Press any key to menu")
         elif option == 2:
-            universos = shelve.open("universos")
-            u = universos[input("Write the name of your Universe")]
-            print("Your Universe was loaded")
+            try:
+                universos = shelve.open("universos")
+                u = universos[input("Write the name of your Universe")]
+                print("Your Universe was loaded")
+            except Exception as e:
+                print (e)
+            input(nome+"> "+"Press any key to menu")
         if option == 3:
-            u.addFact(input('\n'+nome+">"+'Tell me your fact\n> '))
-            print(nome+'>Thanks for telling me')
+            while True:
+                # try:
+                u.addFact(input('\n'+nome+">"+'Tell me your fact\n> '))
+                print(nome+'>Thanks for telling me')
+                # except Exception as e:
+                #     print (e)
+                if input(nome+"> "+"Press key 'm' to menu, or any other to add other fact") == "m":
+                    break
         elif option == 4:
-            a = input('\n'+nome+">"+'Write the subject\n> ')
-            b = input(nome+">"+'Write your assumption\n> ')
-            print(nome+"> "+"This is completely "+str(u.ansQ(a,b)))
-            input(nome+'>'+"Press any key to go back to menu")
+            while True:
+                try:
+                    a = input('\n'+nome+">"+'Write the subject\n> ')
+                    b = input(nome+">"+'Write your assumption\n> ')
+                    print(nome+"> "+"This is completely "+str(u.ansQ(a,b)))
+                except Exception as e:
+                    print (e)
+                if input(nome+"> "+"Press key 'm' to menu, or any other to question again") == "m":
+                    break
         elif option == 5:
             print(nome+"> "+'Thanks, bye bye')
             exit()
@@ -401,3 +427,5 @@ def clausules(sentence):
     sentence_clauses = sorted(sentence_clauses, key=lambda tup: tup[0])
     clauses_text = [clause.text for clause in sentence_clauses]
     return clauses_text
+lemma = nltk.stem.WordNetLemmatizer.lemmatize
+tkn = nltk.data.load('tokenizers/punkt/english.pickle').tokenize

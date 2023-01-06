@@ -1,5 +1,4 @@
 import lib
-import nltk
 
 class algoz:
 
@@ -12,22 +11,25 @@ class algoz:
             s.upperset = []
             u.append(s)
 
+        def __str__(self):
+            return self.name
+
         def ad(self, a):
             self.element.append(a)
 
         def ud(self, a):
             self.upperset.append(a)
 
-        def __str__(self):
-            return self.name
-
     def __init__(self, name="algoz"):
         self.name = name
         self.u = []
         lib.menu(self) # just the Cli menu
+    
+    def __str__(self):
+        return self.name
 
     def iForm(self, v):
-        return nltk.stem.WordNetLemmatizer.lemmatize(v, 'v') # "infinitivo do input"
+        return lib.lemma(v, 'v') # "infinitivo do input"
 
     def cO(self, n):
         for i in self.u:
@@ -55,8 +57,7 @@ class algoz:
 
     def cleanData(self, t):
         t = t.lower()
-        tokenizer = nltk.data.load('tokenizers/punkt/english.pickle') # ["separate.", "text.", "into.", "sentences."]
-        t = tokenizer.tokenize(t)
+        t = lib.tkn(t) # ["separate.", "text.", "into.", "sentences."]
         return t
 
     def addFact(self, t):
@@ -64,6 +65,7 @@ class algoz:
         for j in t:
             c = self.aC(j)
             i = lib.svo(j)[0] # [["Sujeito", "Verbo", "Objeto"]]
+            print(i)
             for k in i[2].split():
                 self.aD(i[1]+" "+i[2], k, c)
             for k in i[1].split():
