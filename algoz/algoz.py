@@ -38,10 +38,6 @@ class algoz:
     def __str__(self):
         return self.name
 
-    def infinitForm(self, v:str):
-        """Retorna infinitivo do verbo"""
-        return lib.lemma(v, 'v') # "infinitivo do input"
-
     def createSet(self, n:str):
         """Create the Set named"""
         for i in self.u:
@@ -59,6 +55,7 @@ class algoz:
     def analizCondic(self, t:str):
         """Analize the conditions Set relations
             and returns the condition to execute as quest\n
+            EM DÚVIDA\n
             EM INGLES"""
         if t.find("if") == -1:
             return 0
@@ -70,50 +67,26 @@ class algoz:
         a = lib.svo(s) # [["Sujeito", "Verbo", "Objeto"]]
         return a[0]
 
-    def cleanData(self, t:str):
-        """Clean string for analysis\n
-        EM INGLES"""
-        t = t.lower()
-        t = lib.tkn(t) # EM INGLES ["separate.", "text.", "into.", "sentences."]
-        return t
-
-    def addFact(self, t:str):
+    def addFact(self, t:str, l="br"):
         """Add a fact"""
-        t = self.cleanData(t) # ["separate.", "text.", "into.", "sentences."]
+        # t = self.cleanData(t) # ["separate.", "text.", "into.", "sentences."]
+        c = self.analizCondic(t)
+        t = lib.heads(t,l)
+        for j in t[0]:
 
-        for j in t: # "sentence"
-            # separar orações
-            ### localizar verbos e conjunções;
-            ### entre conjunção, há uma oração
-            # para cada oração 
-            #### substituir pronomes por seus respectivos nomes
-            #### retornar o nome, com o pronome utilizado adicionado como upperset do nome, e vice-versa
-            ### determinadar pelas classes gramaticais identificadas pelo nltk
-            ### para cada relação de classe contendo fluxo de ação, retornar dupla ativo-passivo
-            ### cada objeto retornado na lista dupla, deve ser da classe s, com sua classe 
-            ### gramatical (função sintática) raiz da palavra, e no upperset;
-            #### apenas caso a palavra e sua raiz sejam iguais, 
-            #### criar instancia s nomeada igual a raiz dentro da raiz
-            #### retornar elemento interno
-            ### para cada par de fluxo de ação retornado,
-            ### adicionar de forma correta com o addSet
-            # para com as conjunções, 
-            # recorrer ao sentido da conjunção pré-determinado
-            ## caso subordinado, subordinar o passivo ao
-            ## 
+            self.addSet(j["text"], t[j["head"]-1]["text"], c) # incluir folha ao nó
+            self.addSet(j["text"], j["upos"]) # incluir folha à classe gramatical
+            self.addSet(j["text"], j["deprel"]) # incluir folha à função sintática
+            self.addSet(j["text"], j["lemma"]) # incluir folha à raiz da palavra
+            if lib.label(t, j["index"]) == "NP": # subjulgar à parte nominal, a verbal
+                for i in lib.transverse(t, j["index"]):
+                    self.addSet(i, j["text"], c)
+            if lib.label(t,j["index"]) == "VP": # subjulgar à parte verbal, as outras partes
+                for i in lib.transverse(t, j["index"]):
+                    if lib.label(t, i["index"]) != "NP":
+                        self.addSet(i, j["text"], c)
 
-            ### analizar primeira resposta https://stackoverflow.com/questions/40851783/creating-parse-trees-in-nltk-using-tagged-sentence
-            ### provavelmente ao criar a arvore se desdobra as relações de fluxo da ação
             ### com isso apenas falta o problema do pronome e do condicional
-
-            c = self.analizCondic(j)
-            i = lib.svo(j)[0] # [["Sujeito", "Verbo", "Objeto"]]
-            for k in i[2].split():
-                self.addSet(i[1]+" "+i[2], k, c)
-            for k in i[1].split():
-                self.addSet(i[1], self.infinitForm(str(k)), c)
-            self.addSet(i[0], i[1]+" "+i[2], c)
-            self.addSet(i[1], i[2], c)
             
     def answerQuestion(self, a:str, b:str):
         """Answer if there is b in a"""

@@ -429,3 +429,8 @@ def clausules(sentence):
     return clauses_text
 lemma = nltk.stem.WordNetLemmatizer.lemmatize
 tkn = nltk.data.load('tokenizers/punkt/english.pickle').tokenize
+import stanza
+def heads(text, lang):
+    return(stanza.Pipeline(lang=lang, processors='tokenize,mwt,pos,lemma,depparse')(text))
+    # print(*[f'word: {word.text} \thead: {sent.words[word.head-1].text if word.head > 0 else "root"}\tdeprel: {word.deprel}' for sent in stanza.Pipeline(lang=lang, processors='tokenize,mwt,pos,lemma,depparse')(text).sentences for word in sent.words], sep='\n')
+heads("Vou fazer assado; é melhor que tu ja venhas vindo para cá", "pt")
